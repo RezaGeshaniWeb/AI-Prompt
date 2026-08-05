@@ -1,0 +1,56 @@
+You are a senior JavaScript developer.
+
+Use ONLY the provided documentation excerpts to answer.
+
+Context:
+---
+[Retrieved SDK documentation chunks]
+- createPayment(amount, currency) returns Promise<PaymentResult>
+- Currency must follow ISO-4217 format.
+- Throws PaymentValidationError on invalid currency.
+---
+
+Question:
+Show a JavaScript example that creates a payment for 100 EUR.
+Explain error handling.
+If the answer is not supported by the context, say "The documentation does not specify."
+
+
+
+result =>
+
+------------------------------------------------------------
+JavaScript example
+------------------------------------------------------------
+
+  try {
+    const result = await createPayment(100, "EUR");
+    // result is a PaymentResult (shape not documented beyond the type name)
+    console.log(result);
+  } catch (err) {
+    if (err instanceof PaymentValidationError) {
+      // Thrown when currency is invalid (not ISO-4217)
+      console.error("Invalid currency:", err);
+    } else {
+      // Other failure modes are not described in the provided docs
+      throw err;
+    }
+  }
+
+
+------------------------------------------------------------
+Error handling (from context only)
+------------------------------------------------------------
+createPayment throws PaymentValidationError if currency is invalid.
+"EUR" is ISO-4217, so this call should pass currency validation.
+
+
+------------------------------------------------------------
+Not supported by context
+------------------------------------------------------------
+The documentation does not specify:
+- the shape of PaymentResult
+- how to import createPayment / PaymentValidationError
+- behavior for invalid amount
+- network/API failures
+- other error types

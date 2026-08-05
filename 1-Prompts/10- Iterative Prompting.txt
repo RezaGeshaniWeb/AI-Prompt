@@ -1,0 +1,120 @@
+# Prompt 1
+Review the following JavaScript function and identify maintainability issues. Explain the problems but do not rewrite the code yet.
+
+function validate(u,p,e){
+  if(u.length<3)return false;
+  if(p.length<8)return false;
+  if(e.indexOf("@")==-1)return false;
+  return true;
+}
+
+# Prompt 2 --------------------------------------
+Rewrite the function using modern JavaScript practices. Improve readability and naming while preserving behavior.
+
+# Prompt 3 --------------------------------------
+Add JSDoc comments and generate Jest unit tests covering normal cases and edge cases.
+
+
+
+result =>
+
+------------------------------------------------------------
+Prompt 1 — Maintainability issues (no rewrite)
+------------------------------------------------------------
+
+- Cryptic names: u, p, e, and validate don't say what is being
+  validated (username, password, email?).
+- No input guards: Non-strings (null, undefined, numbers) throw
+  or behave oddly (u.length, e.indexOf).
+- Weak email check: Only looks for "@"; accepts "@", "a@", "@@", etc.
+- Magic numbers: 3 and 8 are unexplained thresholds.
+- Dense style: No spacing/braces → harder to read, review, and extend.
+- Boolean-only API: Callers can't tell which rule failed.
+- No docs/types: Contract and assumptions are undocumented.
+- Single mixed concern: Auth-ish rules bundled with no clear
+  module boundary.
+
+
+------------------------------------------------------------
+Prompt 2 — Modern rewrite (same behavior)
+------------------------------------------------------------
+
+  function validate(username, password, email) {
+    if (username.length < 3) return false;
+    if (password.length < 8) return false;
+    if (email.indexOf("@") === -1) return false;
+    return true;
+  }
+
+Behavior preserved: still only checks length / indexOf("@");
+still assumes string-like inputs with .length / .indexOf.
+
+
+------------------------------------------------------------
+Prompt 3 — JSDoc + Jest tests
+------------------------------------------------------------
+
+  /**
+   * Validates username, password, and email with minimal rules.
+   *
+   * Rules (unchanged from original behavior):
+   * - username length must be >= 3
+   * - password length must be >= 8
+   * - email must contain at least one "@"
+   *
+   * @param {string} username
+   * @param {string} password
+   * @param {string} email
+   * @returns {boolean} true if all checks pass; otherwise false
+   */
+  function validate(username, password, email) {
+    if (username.length < 3) return false;
+    if (password.length < 8) return false;
+    if (email.indexOf("@") === -1) return false;
+    return true;
+  }
+
+  module.exports = { validate };
+
+
+  // --- Jest unit tests ---
+
+  const { validate } = require("./validate");
+
+  describe("validate", () => {
+    test("accepts valid username, password, and email", () => {
+      expect(validate("bob", "password1", "a@b.com")).toBe(true);
+    });
+
+    test("rejects username shorter than 3 characters", () => {
+      expect(validate("ab", "password1", "a@b.com")).toBe(false);
+    });
+
+    test("accepts username with exactly 3 characters", () => {
+      expect(validate("bob", "password1", "a@b.com")).toBe(true);
+    });
+
+    test("rejects password shorter than 8 characters", () => {
+      expect(validate("bob", "passwor", "a@b.com")).toBe(false);
+    });
+
+    test("accepts password with exactly 8 characters", () => {
+      expect(validate("bob", "password", "a@b.com")).toBe(true);
+    });
+
+    test("rejects email without @", () => {
+      expect(validate("bob", "password1", "ab.com")).toBe(false);
+    });
+
+    test("accepts email that only contains @ (current weak rule)", () => {
+      expect(validate("bob", "password1", "@")).toBe(true);
+    });
+
+    test("accepts email with @ at the start", () => {
+      expect(validate("bob", "password1", "@x")).toBe(true);
+    });
+
+    test("fails closed when multiple rules fail (username + password)", () => {
+      expect(validate("ab", "short", "a@b.com")).toBe(false);
+    });
+  });

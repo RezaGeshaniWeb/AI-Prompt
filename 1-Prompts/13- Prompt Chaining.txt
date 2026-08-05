@@ -1,0 +1,152 @@
+# Prompt 1
+You are a senior JavaScript developer.
+
+Design an Express.js POST /register endpoint.
+
+Requirements:
+- Accept email and password.
+- Validate inputs.
+- Hash passwords using bcrypt.
+- Return appropriate HTTP status codes.
+
+Output only a step-by-step implementation plan.
+
+#Prompt 2 ------------------------------------
+Using the implementation plan below, generate the complete Express.js code.
+
+Plan:
+[Paste output from Prompt 1]
+
+Include comments explaining major sections.
+
+#Prompt 3 ------------------------------------
+Review the following Express.js code for:
+- Security issues
+- Error handling gaps
+- Missing validation
+- Maintainability concerns
+
+Suggest improvements with explanations.
+
+Code:
+[Paste output from Prompt 2]
+
+
+
+result =>
+
+------------------------------------------------------------
+Prompt 1 — Implementation plan
+------------------------------------------------------------
+
+1. Set up Express router/app and POST /register with JSON body parser.
+2. Validate email (required, format) and password (required, min length /
+   basic strength).
+3. On validation failure → 400 with clear error messages.
+4. Normalize email (trim + lowercase).
+5. Check if email already exists in the user store/DB → if yes → 409 Conflict.
+6. Hash password with bcrypt (cost factor ~10–12); never store plaintext.
+7. Persist user (email, passwordHash, timestamps); do not return the hash.
+8. On success → 201 Created with safe user payload (e.g. id, email).
+9. Catch unexpected errors → 500 (no stack traces to client).
+10. Keep hashing/DB work async; use parameterized queries / ORM to avoid
+    injection.
+
+
+------------------------------------------------------------
+Prompt 2 — Complete Express.js code
+------------------------------------------------------------
+
+  const express = require("express");
+  const bcrypt = require("bcrypt");
+
+  const app = express();
+  app.use(express.json());
+
+  // In-memory store for demo — replace with a real DB
+  const users = [];
+
+  function isValidEmail(email) {
+    return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  app.post("/register", async (req, res) => {
+    try {
+      // --- Input extraction ---
+      const { email, password } = req.body ?? {};
+
+      // --- Validation ---
+      const errors = [];
+      if (!isValidEmail(email)) {
+        errors.push("Valid email is required");
+      }
+      if (typeof password !== "string" || password.length < 8) {
+        errors.push("Password must be a string with at least 8 characters");
+      }
+      if (errors.length) {
+        return res.status(400).json({ errors });
+      }
+
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // --- Duplicate check ---
+      if (users.some((u) => u.email === normalizedEmail)) {
+        return res.status(409).json({ error: "Email already registered" });
+      }
+
+      // --- Password hashing ---
+      const saltRounds = 12;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+
+      // --- Persist user ---
+      const user = {
+        id: users.length + 1,
+        email: normalizedEmail,
+        passwordHash,
+        createdAt: new Date().toISOString(),
+      };
+      users.push(user);
+
+      // --- Success response (never return passwordHash) ---
+      return res.status(201).json({
+        id: user.id,
+        email: user.email,
+        createdAt: user.createdAt,
+      });
+    } catch (err) {
+      // --- Unexpected errors ---
+      console.error("POST /register failed", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  module.exports = app;
+
+
+------------------------------------------------------------
+Prompt 3 — Review & improvements
+------------------------------------------------------------
+
+  Area              Issue                              Improvement
+  ---------------------------------------------------------------------------
+  Security          In-memory users + incremental id   Use DB + UUID; persist securely
+  Security          No rate limiting                   Rate-limit /register
+  Security          Password rules only length         Stronger policy / breach check;
+                                                       tune bcrypt cost under load
+  Security          No helmet / HTTPS assumptions      Use helmet, HTTPS termination
+  Error handling    console.error only                 Structured logger; map DB unique
+                                                       constraint errors to 409
+  Validation        Basic email regex; body shape      Schema validator (zod/joi);
+                                                       reject unknown fields
+  Validation        No max password length             Cap length (e.g. 72 for bcrypt)
+                                                       to avoid DoS via huge payloads
+  Maintainability   Route/validation/storage mixed     Split routes / validators /
+                                                       userService
+  Maintainability   Demo store in module scope         Inject repository for testing
+  Missing           No JSON body size limit            express.json({ limit: "10kb" })
+
+Highest priority fixes:
+  - Replace in-memory store with DB + unique index on email
+  - Add body size limit + rate limiting
+  - Extract validation/service layers
+  - Cap password length before bcrypt.hash

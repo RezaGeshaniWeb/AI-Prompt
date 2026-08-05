@@ -1,0 +1,62 @@
+You are a senior JavaScript engineer.
+
+Review the following function and:
+- Focus especially on edge cases (null, undefined, empty arrays)
+- Identify potential runtime errors
+- Suggest minimal fixes without rewriting the entire function
+- Prioritize readability over performance
+
+Function:
+function getFirst(arr) {
+  return arr[0];
+}
+
+
+
+result =>
+
+------------------------------------------------------------
+Edge cases
+------------------------------------------------------------
+- null / undefined:
+  arr[0] throws TypeError (cannot read properties of null/undefined).
+
+- Empty array []:
+  Returns undefined — no throw, but callers may not expect that.
+
+- Non-array values (e.g. object, number, string):
+  May not throw (e.g. "hi"[0] => "h") but behavior is misleading
+  for a function named getFirst(arr).
+
+
+------------------------------------------------------------
+Potential runtime errors
+------------------------------------------------------------
+- TypeError when arr is null or undefined.
+- Silent undefined when arr is [] (logic bug for callers, not a crash).
+
+
+------------------------------------------------------------
+Minimal fixes (readability over performance)
+------------------------------------------------------------
+
+  function getFirst(arr) {
+    if (!Array.isArray(arr) || arr.length === 0) {
+      return undefined;
+    }
+    return arr[0];
+  }
+
+Why this is minimal:
+- Keeps the same happy-path return (arr[0]).
+- Guards null/undefined/non-arrays without a full rewrite.
+- Makes empty-array behavior explicit and readable.
+
+Optional (if failing fast is preferred):
+
+  function getFirst(arr) {
+    if (!Array.isArray(arr)) {
+      throw new TypeError("getFirst() expects an array");
+    }
+    return arr[0]; // still undefined for []
+  }

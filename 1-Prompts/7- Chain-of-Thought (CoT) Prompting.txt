@@ -1,0 +1,91 @@
+You are a JavaScript expert.
+Explain step-by-step how you would debug the following function.
+Think through possible edge cases before giving the final corrected version.
+Function:
+    function unique(arr) {  
+    return [...new Set(arr)];  
+    }  
+
+
+result =>
+
+------------------------------------------------------------
+Step 1 — What the function intends
+------------------------------------------------------------
+unique(arr) should return a new array with duplicate values
+removed, while preserving the order of first appearance.
+
+
+------------------------------------------------------------
+Step 2 — What the function actually does
+------------------------------------------------------------
+1. new Set(arr) stores unique values using SameValueZero equality.
+2. [...set] converts that Set back into an array.
+
+For primitive values, this usually works as expected:
+
+  unique([1, 2, 2, 3])       // [1, 2, 3]
+  unique(["a", "a", "b"])    // ["a", "b"]
+
+
+------------------------------------------------------------
+Step 3 — Edge cases
+------------------------------------------------------------
+
+  Input                         Result / Behavior              Issue?
+  ---------------------------------------------------------------------------
+  []                            []                             No
+  null / undefined              Throws (not iterable)          Yes
+  Non-array iterable            Works, but may surprise        Maybe
+  ("hello", Set, generator)     the caller
+  Non-iterable (42, {})         Throws                         Yes
+  NaN duplicates                Collapsed (SameValueZero)      Usually OK
+  +0 and -0                     Collapsed into one             Usually OK
+  Objects [{a:1}, {a:1}]        Kept as 2 items (by reference) Depends
+  Nested arrays [[1], [1]]      Not deep-unique                Depends
+  Sparse arrays                 Holes behave oddly via Set     Rare
+  Mixed types [1, "1"]          Both kept                      Correct
+
+Main real problems for a unique() helper:
+  - No input validation (null, undefined, non-arrays crash)
+  - Only reference equality for objects (not deep/value equality)
+
+
+------------------------------------------------------------
+Step 4 — Corrected versions
+------------------------------------------------------------
+
+A) Safe version for primitives (recommended default):
+
+  function unique(arr) {
+    if (!Array.isArray(arr)) {
+      throw new TypeError("unique() expects an array");
+    }
+    return [...new Set(arr)];
+  }
+
+
+B) Deep / value uniqueness for plain objects:
+
+  function unique(arr) {
+    if (!Array.isArray(arr)) {
+      throw new TypeError("unique() expects an array");
+    }
+
+    const seen = new Set();
+
+    return arr.filter((item) => {
+      const key =
+        typeof item === "object" && item !== null
+          ? JSON.stringify(item)
+          : item;
+
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  Note: JSON.stringify has limits (key order, undefined,
+  circular references). Use option B only when that tradeoff
+  is acceptable.

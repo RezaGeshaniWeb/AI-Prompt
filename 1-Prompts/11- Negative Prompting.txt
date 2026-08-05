@@ -1,0 +1,135 @@
+Write a Python function that calculates total monthly sales from a CSV file.
+
+Requirements:
+- Use only the Python standard library.
+- Handle malformed rows gracefully.
+- Include a concise docstring.
+
+Do NOT:
+- Use pandas or third-party libraries.
+- Generate visualization code.
+- Read files from hard-coded paths.
+- Ignore exceptions silently.
+- Fabricate sample data that was not provided.
+
+If assumptions are necessary, state them explicitly.
+
+
+
+result =>
+
+------------------------------------------------------------
+Assumptions
+------------------------------------------------------------
+- CSV has a header row.
+- Amount column is numeric (int/float).
+- Month comes from either:
+  - month_column (e.g. "2024-01" or "1"), or
+  - date_column + date_format (month derived from the date).
+- Caller passes file_path (not hard-coded).
+- Malformed rows are skipped and reported in an errors list
+  (not swallowed silently).
+- No sample CSV data is fabricated.
+
+
+------------------------------------------------------------
+Code
+------------------------------------------------------------
+
+  import csv
+  from datetime import datetime
+  from typing import List, Optional, Tuple
+
+
+  def total_monthly_sales(
+      file_path: str,
+      *,
+      amount_column: str = "amount",
+      month_column: Optional[str] = "month",
+      date_column: Optional[str] = None,
+      year_month: str,
+      date_format: str = "%Y-%m-%d",
+      encoding: str = "utf-8",
+  ) -> Tuple[float, List[str]]:
+      """
+      Sum sales for one calendar month from a CSV file (stdlib only).
+
+      Returns (total, errors). Malformed or incomplete rows are skipped
+      and described in errors.
+      """
+      if not year_month:
+          raise ValueError("year_month is required (e.g. '2024-01' or '1')")
+
+      target = year_month.strip()
+      total = 0.0
+      errors: List[str] = []
+
+      with open(file_path, newline="", encoding=encoding) as fh:
+          reader = csv.DictReader(fh)
+          if reader.fieldnames is None:
+              raise ValueError(f"CSV has no header row: {file_path}")
+
+          for line_no, row in enumerate(reader, start=2):
+              try:
+                  if date_column:
+                      raw_date = (row.get(date_column) or "").strip()
+                      if not raw_date:
+                          raise ValueError(f"missing {date_column}")
+                      dt = datetime.strptime(raw_date, date_format)
+                      row_month = f"{dt.year:04d}-{dt.month:02d}"
+                  else:
+                      if not month_column:
+                          raise ValueError("provide month_column or date_column")
+                      raw_month = (row.get(month_column) or "").strip()
+                      if not raw_month:
+                          raise ValueError(f"missing {month_column}")
+                      row_month = raw_month
+
+                  if not _month_matches(row_month, target):
+                      continue
+
+                  raw_amount = (row.get(amount_column) or "").strip()
+                  if not raw_amount:
+                      raise ValueError(f"missing {amount_column}")
+                  total += float(raw_amount)
+
+              except (ValueError, TypeError, KeyError) as exc:
+                  errors.append(f"line {line_no}: {exc}")
+
+      return total, errors
+
+
+  def _month_matches(row_month: str, target: str) -> bool:
+      """Match 'YYYY-MM', or bare month numbers like '1' vs '01'."""
+      if row_month == target:
+          return True
+      if target.isdigit():
+          try:
+              return _month_number(row_month) == int(target)
+          except ValueError:
+              return False
+      return False
+
+
+  def _month_number(value: str) -> int:
+      """Extract month number from 'YYYY-MM' or a numeric month string."""
+      if "-" in value:
+          return int(value.split("-")[1])
+      return int(value)
+
+
+------------------------------------------------------------
+Example call
+------------------------------------------------------------
+
+  total, errors = total_monthly_sales(
+      "sales.csv",
+      amount_column="amount",
+      date_column="date",
+      year_month="2024-01",
+  )
+  print(total, errors)
+
+
+Constraints respected: stdlib only, no pandas/plots, path is an
+argument, exceptions are recorded (not ignored), no fabricated CSV data.

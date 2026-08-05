@@ -1,0 +1,21 @@
+Write a Python program to solve this problem:
+
+Generate Fibonacci numbers up to N = 50.
+Return a list of only even Fibonacci numbers.
+
+Return ONLY executable Python code.
+
+
+
+result =>
+
+N = 50
+fib = []
+a, b = 0, 1
+while a <= N:
+    fib.append(a)
+    a, b = b, a + b
+
+even_fib = [x for x in fib if x % 2 == 0]
+print(even_fib)
+

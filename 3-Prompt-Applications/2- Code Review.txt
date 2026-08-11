@@ -1,0 +1,302 @@
+[ROLE]
+You are a senior JavaScript engineer and code reviewer with expertise in clean code, performance optimization, and security best practices.
+
+[TASK]
+Perform a comprehensive code review of the provided JavaScript code.
+
+[CODE]
+```javascript
+function getActiveUsers(users) {
+    let result = [];
+
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].isActive == true) {
+            result.push(users[i]);
+        }
+    }
+
+    return result;
+}
+
+const users = [
+    { name: "Ali", isActive: "true" },
+    { name: "Sara", isActive: false },
+    { name: "John", isActive: true }
+];
+
+console.log(getActiveUsers(users));
+```
+
+[FOCUS AREAS]
+
+* Code correctness (logical bugs)
+* Type safety issues
+* Performance optimization
+* Clean code & readability
+* Best practices in modern JavaScript (ES6+)
+
+[CONSTRAINTS]
+
+* Do NOT rewrite the entire code unless necessary
+* Highlight issues first, then suggest improvements
+* Be specific with line-level feedback
+
+[OUTPUT FORMAT]
+
+1. Summary of issues
+2. Line-by-line review
+3. Suggested improvements
+4. Optional optimized version of critical parts only
+
+[ADDITIONAL NOTES]
+Assume this code will run in a production Node.js environment.
+
+
+
+result =>
+
+1. Summary of issues
+Logical/type bug: isActive is sometimes a boolean and sometimes a string.
+javascript
+   { name: "Ali", isActive: "true" }
+The string "true" is not the boolean true.
+
+Unsafe equality check:
+javascript
+   users[i].isActive == true
+Loose equality can produce unexpected coercion behavior. In this case, "true" == true evaluates to false.
+
+Potential runtime errors: The function assumes:
+
+users is always an array.
+Every element is a non-null object.
+Every user has an isActive property.
+Readability: Index-based access is more verbose than necessary for this operation.
+
+Performance: The current loop is already 
+𝑂
+(
+𝑛
+)
+O(n)
+, which is optimal for filtering. The main improvement is readability, not asymptotic performance.
+
+2. Line-by-line review
+Function declaration
+javascript
+function getActiveUsers(users) {
+The function name is clear.
+There is no runtime validation that users is an array.
+In a production environment, invalid input could cause an error when accessing users.length.
+Possible defensive check:
+
+javascript
+if (!Array.isArray(users)) {
+    throw new TypeError("users must be an array");
+}
+Result initialization
+javascript
+let result = [];
+let is valid because the array is modified with push().
+const would be preferable because the variable binding itself is never reassigned:
+javascript
+const result = [];
+const does not prevent modifying the contents of the array.
+
+Loop condition
+javascript
+for (let i = 0; i < users.length; i++) {
+This is logically correct.
+It visits each element exactly once.
+Complexity is 
+𝑂
+(
+𝑛
+)
+O(n)
+, which is appropriate.
+A for...of loop or filter() would be more readable and less error-prone.
+
+User access
+javascript
+if (users[i].isActive == true) {
+This is the main problematic line.
+
+Issue 1: Loose equality
+The use of == permits implicit type conversion. Prefer strict equality:
+
+javascript
+users[i].isActive === true
+However, strict equality alone will not make "true" count as active. "true" and true are different values.
+
+Issue 2: Inconsistent data type
+The input contains:
+
+javascript
+{ name: "Ali", isActive: "true" }
+but the other records use booleans:
+
+javascript
+{ name: "Sara", isActive: false },
+{ name: "John", isActive: true }
+The data should use one consistent representation. Ideally, isActive should always be a boolean:
+
+javascript
+{ name: "Ali", isActive: true }
+With the current code:
+
+javascript
+"true" == true // false
+Therefore, Ali is incorrectly excluded from the result.
+
+Issue 3: Possible null or malformed entries
+If users[i] is null or undefined, this will throw:
+
+text
+TypeError: Cannot read properties of null
+If input validation is guaranteed elsewhere, this may not need handling inside the function. Otherwise, use a guard such as:
+
+javascript
+user?.isActive === true
+Adding the user
+javascript
+result.push(users[i]);
+Correctly preserves the original user object reference.
+It does not clone or mutate the object.
+If callers may mutate the returned users, consider whether defensive copying is required. Usually, returning the original references is acceptable and more efficient.
+Return statement
+javascript
+return result;
+Correct.
+Returns a new array.
+The original users array is not modified.
+Input data
+javascript
+const users = [
+    { name: "Ali", isActive: "true" },
+    { name: "Sara", isActive: false },
+    { name: "John", isActive: true }
+];
+The inconsistent type of isActive is the primary data-quality problem.
+
+Corrected data:
+
+javascript
+const users = [
+    { name: "Ali", isActive: true },
+    { name: "Sara", isActive: false },
+    { name: "John", isActive: true }
+];
+3. Suggested improvements
+A. Normalize the data model
+Use booleans consistently:
+
+javascript
+isActive: true
+Do not mix:
+
+javascript
+true
+"true"
+1
+"1"
+A consistent schema improves correctness, validation, and maintainability.
+
+B. Use strict equality
+Use:
+
+javascript
+user.isActive === true
+This makes the expected type explicit and avoids implicit coercion.
+
+Avoid:
+
+javascript
+user.isActive == true
+Also be cautious with:
+
+javascript
+if (user.isActive)
+That form treats any truthy value—including "false"—as active:
+
+javascript
+Boolean("false") // true
+C. Prefer filter() for filtering operations
+The operation is exactly what Array.prototype.filter() is designed for. It clearly communicates intent and remains 
+𝑂
+(
+𝑛
+)
+O(n)
+:
+
+javascript
+const activeUsers = users.filter(user => user.isActive === true);
+D. Validate external input
+In production Node.js applications, data may come from an API, database, message queue, or user input. Validate it at the boundary rather than silently accepting malformed values.
+
+For example, a validation library or schema can enforce:
+
+text
+users: array
+users[].name: string
+users[].isActive: boolean
+If validation has already occurred upstream, the filtering function can remain simple.
+
+E. Avoid unnecessary optimization
+The current implementation is already linear:
+
+text
+O(n)
+Any solution that must inspect every user cannot generally do better than 
+𝑂
+(
+𝑛
+)
+O(n)
+. Replacing the loop with filter() improves readability, but it does not improve asymptotic performance.
+
+Memory usage is also 
+𝑂
+(
+𝑘
+)
+O(k)
+, where 
+𝑘
+k
+ is the number of active users.
+
+4. Optional optimized version of critical parts only
+Assuming the input data is normalized and isActive is always a boolean:
+
+javascript
+function getActiveUsers(users) {
+    return users.filter(user => user.isActive === true);
+}
+
+const users = [
+    { name: "Ali", isActive: true },
+    { name: "Sara", isActive: false },
+    { name: "John", isActive: true }
+];
+
+console.log(getActiveUsers(users));
+Output:
+
+javascript
+[
+    { name: "Ali", isActive: true },
+    { name: "John", isActive: true }
+]
+If malformed entries are possible and should simply be ignored:
+
+javascript
+function getActiveUsers(users) {
+    if (!Array.isArray(users)) {
+        throw new TypeError("users must be an array");
+    }
+
+    return users.filter(user => user?.isActive === true);
+}
+The best overall recommendation is to fix the input schema and use strict boolean comparison rather than converting values implicitly inside the filter.

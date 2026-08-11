@@ -1,0 +1,181 @@
+[ROLE]
+You are a senior technical writer and JavaScript engineer with expertise in API documentation, developer experience (DX), and clean code standards.
+
+[TASK]
+Generate high-quality documentation for the given JavaScript code, including function descriptions, parameters, return values, and usage examples.
+
+[CODE]
+```javascript
+function calculateDiscount(price, discountPercent) {
+    if (price < 0 || discountPercent < 0) {
+        throw new Error("Invalid input");
+    }
+
+    const discount = (price * discountPercent) / 100;
+    return price - discount;
+}
+
+function applyTax(amount, taxRate) {
+    return amount + (amount * taxRate) / 100;
+}
+```
+
+[DOCUMENTATION REQUIREMENTS]
+
+* Provide clear explanation for each function
+* Include parameter descriptions (type + meaning)
+* Include return value description
+* Add real-world usage examples
+* Mention edge cases and error handling
+* Use a format suitable for developer documentation (like README or API docs)
+
+[CONSTRAINTS]
+
+* Do NOT change the code
+* Do NOT add new functionality
+* Keep explanations concise but precise
+* Use professional technical writing style
+
+[OUTPUT FORMAT]
+
+1. Overview of the module
+2. Function documentation
+    * calculateDiscount
+    * applyTax
+3. Usage examples
+4. Edge cases & warnings
+5. Best practices notes
+
+
+
+result =>
+
+1. Overview of the module
+This module provides two simple pricing utility functions:
+
+calculateDiscount(price, discountPercent) calculates the final price after applying a percentage discount.
+applyTax(amount, taxRate) calculates the final amount after applying a percentage tax rate.
+These functions are useful in shopping carts, invoices, checkout flows, billing systems, and financial calculations where percentage-based adjustments are needed.
+
+2. Function documentation
+calculateDiscount(price, discountPercent)
+Calculates the final price after subtracting a percentage-based discount from the original price.
+
+Signature
+javascript
+calculateDiscount(price, discountPercent)
+Parameters
+
+Parameter	Type	Description
+price	number	Original price before discount. Must be greater than or equal to 0.
+discountPercent	number	Discount percentage to apply. Must be greater than or equal to 0.
+Returns
+
+Type	Description
+number	Final price after the discount is applied.
+Throws
+Throws an Error when either price or discountPercent is negative.
+
+javascript
+throw new Error("Invalid input");
+Example
+javascript
+const finalPrice = calculateDiscount(200, 15);
+
+console.log(finalPrice); // 170
+Calculation:
+
+text
+discount = (200 * 15) / 100 = 30
+finalPrice = 200 - 30 = 170
+applyTax(amount, taxRate)
+Calculates the final amount after adding a percentage-based tax to the given amount.
+
+Signature
+javascript
+applyTax(amount, taxRate)
+Parameters
+
+Parameter	Type	Description
+amount	number	Base amount before tax.
+taxRate	number	Tax percentage to apply.
+Returns
+
+Type	Description
+number	Final amount after tax is added.
+Example
+javascript
+const totalWithTax = applyTax(170, 9);
+
+console.log(totalWithTax); // 185.3
+Calculation:
+
+text
+tax = (170 * 9) / 100 = 15.3
+finalAmount = 170 + 15.3 = 185.3
+
+3. Usage examples
+Apply a discount to a product price
+javascript
+const productPrice = 100;
+const discountPercent = 20;
+
+const discountedPrice = calculateDiscount(productPrice, discountPercent);
+
+console.log(discountedPrice); // 80
+Apply tax after discount
+javascript
+const originalPrice = 250;
+const discountPercent = 10;
+const taxRate = 8;
+
+const discountedPrice = calculateDiscount(originalPrice, discountPercent);
+const finalTotal = applyTax(discountedPrice, taxRate);
+
+console.log(finalTotal); // 243
+Calculation:
+
+text
+discountedPrice = 250 - ((250 * 10) / 100) = 225
+finalTotal = 225 + ((225 * 8) / 100) = 243
+Handle invalid discount input
+javascript
+try {
+    const finalPrice = calculateDiscount(-100, 10);
+    console.log(finalPrice);
+} catch (error) {
+    console.error(error.message); // Invalid input
+}
+
+4. Edge cases & warnings
+calculateDiscount
+Negative price values are rejected.
+Negative discountPercent values are rejected.
+A discountPercent of 0 returns the original price.
+A discountPercent of 100 returns 0.
+A discountPercent greater than 100 returns a negative final price.
+Example:
+
+javascript
+console.log(calculateDiscount(100, 150)); // -50
+This behavior is allowed by the current implementation.
+
+applyTax
+The function does not validate input.
+Negative amount values are accepted.
+Negative taxRate values are accepted and effectively reduce the amount.
+A taxRate of 0 returns the original amount.
+Very large tax rates can significantly increase the result.
+Non-number values may produce unexpected results due to JavaScript type coercion.
+Example:
+
+javascript
+console.log(applyTax(100, -10)); // 90
+
+5. Best practices notes
+Validate inputs before calling these functions, especially in production payment or billing flows.
+Use numeric values only. Avoid passing strings such as "100" or "10".
+Consider rounding final monetary values to the correct currency precision at the application boundary.
+Be explicit about whether discounts greater than 100% are allowed.
+Be consistent with validation rules between calculateDiscount() and applyTax().
+For financial systems requiring exact precision, consider integer minor units such as cents instead of floating-point decimal amounts.

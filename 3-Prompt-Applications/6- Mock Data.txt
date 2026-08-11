@@ -1,0 +1,170 @@
+[ROLE]
+You are a senior JavaScript developer and data engineer with expertise in mock data for test and develop frontend/backend and API simulation.
+
+[TASK]
+Generate realistic and structured mock data in JavaScript based on the given data model. The output should be ready to use in development or testing environments.
+
+[DATA MODEL]
+We are building a simple Expense Tracker system.
+
+Each expense item should have:
+- id: unique number
+- title: string (expense name)
+- amount: number (in USD)
+- category: string (e.g., food, transport, shopping, bills)
+- date: ISO string format
+- isRecurring: boolean
+
+[REQUIREMENTS]
+- Generate 15 realistic expense records
+- Use diverse categories
+- Ensure dates are spread over the last 30 days
+- Amounts should look realistic (not repetitive)
+- IDs must be unique and sequential
+- Data should be suitable for UI testing
+
+[OUTPUT FORMAT]
+Return only valid JavaScript code in this format:
+
+```javascript
+const mockExpenses = [ ... ];
+```
+
+[CONSTRAINTS]
+
+* Do NOT include explanations
+* Do NOT include extra text outside code
+* Do NOT use external libraries
+* Ensure data consistency and correctness
+
+[ADDITIONAL NOTES]
+This mock data will be used in a dashboard UI for testing charts, filters, and summaries.
+
+
+
+result =>
+
+```javascript
+const mockExpenses = [
+    {
+        id: 1,
+        title: "Grocery shopping at Whole Foods",
+        amount: 84.56,
+        category: "food",
+        date: "2026-07-14T10:25:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 2,
+        title: "Monthly internet bill",
+        amount: 59.99,
+        category: "bills",
+        date: "2026-07-15T08:00:00.000Z",
+        isRecurring: true
+    },
+    {
+        id: 3,
+        title: "Uber to downtown office",
+        amount: 18.40,
+        category: "transport",
+        date: "2026-07-17T07:45:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 4,
+        title: "New running shoes",
+        amount: 129.00,
+        category: "shopping",
+        date: "2026-07-19T16:20:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 5,
+        title: "Lunch at Italian cafe",
+        amount: 27.85,
+        category: "food",
+        date: "2026-07-21T12:35:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 6,
+        title: "Electricity bill",
+        amount: 112.34,
+        category: "bills",
+        date: "2026-07-23T09:10:00.000Z",
+        isRecurring: true
+    },
+    {
+        id: 7,
+        title: "Weekly metro pass",
+        amount: 35.00,
+        category: "transport",
+        date: "2026-07-25T06:50:00.000Z",
+        isRecurring: true
+    },
+    {
+        id: 8,
+        title: "Online clothing order",
+        amount: 76.20,
+        category: "shopping",
+        date: "2026-07-27T20:15:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 9,
+        title: "Coffee and pastry",
+        amount: 9.75,
+        category: "food",
+        date: "2026-07-29T08:20:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 10,
+        title: "Mobile phone plan",
+        amount: 45.00,
+        category: "bills",
+        date: "2026-07-31T11:00:00.000Z",
+        isRecurring: true
+    },
+    {
+        id: 11,
+        title: "Gas station refill",
+        amount: 52.18,
+        category: "transport",
+        date: "2026-08-02T17:40:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 12,
+        title: "Home office desk lamp",
+        amount: 39.99,
+        category: "shopping",
+        date: "2026-08-04T14:05:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 13,
+        title: "Dinner with friends",
+        amount: 68.40,
+        category: "food",
+        date: "2026-08-06T19:30:00.000Z",
+        isRecurring: false
+    },
+    {
+        id: 14,
+        title: "Streaming subscription",
+        amount: 15.99,
+        category: "bills",
+        date: "2026-08-08T12:00:00.000Z",
+        isRecurring: true
+    },
+    {
+        id: 15,
+        title: "Airport taxi ride",
+        amount: 41.25,
+        category: "transport",
+        date: "2026-08-11T05:55:00.000Z",
+        isRecurring: false
+    }
+];
+```

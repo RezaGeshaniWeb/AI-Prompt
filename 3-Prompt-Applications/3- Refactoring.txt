@@ -1,0 +1,188 @@
+[ROLE]
+You are a senior JavaScript engineer specializing in clean architecture, refactoring, and scalable code design.
+
+[TASK]
+Refactor the given JavaScript code to improve readability, maintainability, and adherence to modern best practices (ES6+).
+
+[CODE]
+```javascript
+function processData(data) {
+    let result = [];
+
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].active == true) {
+            let obj = {
+                id: data[i].id,
+                name: data[i].name,
+                value: data[i].value * 2
+            };
+            result.push(obj);
+        }
+    }
+
+    return result;
+}
+
+const input = [
+    { id: 1, name: "A", value: 10, active: true },
+    { id: 2, name: "B", value: 20, active: false },
+    { id: 3, name: "C", value: 30, active: true }
+];
+
+console.log(processData(input));
+```
+[REFRACTING GOALS]
+* Improve code readability
+* Use modern JavaScript features (map, filter, arrow functions, etc.)
+* Reduce unnecessary variables and mutation
+* Improve naming clarity
+* Keep output behavior exactly the same
+
+[CONSTRAINTS]
+
+* Do NOT change the business logic
+* Do NOT add external libraries
+* Ensure output remains identical
+* Prefer functional programming style where appropriate
+
+[ANALYSIS REQUIRED]
+Before refactoring:
+
+* Identify code smells
+* Point out inefficiencies
+* Mention violations of best practices
+
+[OUTPUT FORMAT]
+
+1. Code issues analysis
+2. Refactoring strategy
+3. Refactored code
+4. Short explanation of improvements
+
+
+
+result =>
+
+1. Code issues analysis
+a. Generic naming
+javascript
+function processData(data) {
+processData and data do not describe what is being processed or what the function returns.
+
+Based on its behavior, the function:
+
+selects active records;
+creates a new object for each selected record;
+doubles each record’s value.
+Names such as transformActiveItems and items are more descriptive.
+
+b. Manual array accumulation and mutation
+javascript
+let result = [];
+and:
+
+javascript
+result.push(obj);
+The function manually builds an array. This works, but the intent is clearer with:
+
+filter() for selecting active items;
+map() for transforming selected items.
+c. Index-based iteration
+javascript
+for (let i = 0; i < data.length; i++) {
+The index is only used to retrieve the current item:
+
+javascript
+data[i]
+This makes the code repetitive and less readable. Modern JavaScript array methods avoid this duplication.
+
+d. Loose equality comparison
+javascript
+if (data[i].active == true) {
+== allows implicit type coercion. For example, unexpected values may behave differently than intended.
+
+Use strict equality:
+
+javascript
+item.active === true
+This preserves the current intended business logic: only records whose active value is the boolean true are processed.
+
+e. Repeated property access
+The original code accesses the same array element multiple times:
+
+javascript
+data[i].id
+data[i].name
+data[i].value
+data[i].active
+Using a named callback parameter improves readability and avoids repeated indexing.
+
+f. Unnecessary temporary object variable
+javascript
+let obj = {
+    id: data[i].id,
+    name: data[i].name,
+    value: data[i].value * 2
+};
+
+result.push(obj);
+The object is created only to be pushed into the result. It can be returned directly from map().
+
+g. Efficiency note
+The original implementation is already linear:
+
+𝑂
+(
+𝑛
+)
+O(n)
+
+Using filter() followed by map() also has linear time complexity, though it performs two array passes and creates an intermediate array. For ordinary application data, the readability gain is usually worth it.
+
+For extremely large datasets where minimizing allocations is important, a single-pass reduce() or for...of implementation could be considered. However, filter() + map() is the clearest option for this requirement.
+
+2. Refactoring strategy
+Rename the function and parameter to describe their purpose.
+Use filter() to retain only active items.
+Use map() to create transformed output objects.
+Replace loose equality (==) with strict equality (===).
+Use arrow functions and implicit returns where readability remains clear.
+Keep the output behavior unchanged:
+inactive records are excluded;
+active records retain only id, name, and transformed value;
+value is multiplied by 2.
+
+3. Refactored code
+javascript
+function transformActiveItems(items) {
+    return items
+        .filter(item => item.active === true)
+        .map(({ id, name, value }) => ({
+            id,
+            name,
+            value: value * 2
+        }));
+}
+
+const input = [
+    { id: 1, name: "A", value: 10, active: true },
+    { id: 2, name: "B", value: 20, active: false },
+    { id: 3, name: "C", value: 30, active: true }
+];
+
+console.log(transformActiveItems(input));
+Output remains identical:
+
+javascript
+[
+    { id: 1, name: "A", value: 20 },
+    { id: 3, name: "C", value: 60 }
+]
+
+4. Short explanation of improvements
+Clearer naming: transformActiveItems explains what the function does.
+Declarative logic: filter() expresses selection; map() expresses transformation.
+No manual mutation: Removes result.push() and the temporary obj variable.
+Strict comparison: item.active === true avoids unwanted type coercion.
+Destructuring: Extracts only the fields needed for the output.
+Same behavior: Active items are returned with value doubled; inactive items are omitted.

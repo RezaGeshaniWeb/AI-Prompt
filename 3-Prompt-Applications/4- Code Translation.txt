@@ -57,44 +57,36 @@ result =>
 
 1. Language differences summary
 
-JavaScript construct	C++ equivalent
-Dynamically typed values	Statically declared types such as int
-JavaScript Array	std::vector<int>
-arr.length	arr.size()
-let / const	Explicit types, optionally with C++ const
-console.log(...)	std::cout << ... << '\n'
-Automatic function parameter typing	Explicit parameter and return types
-Garbage-collected memory	RAII-based automatic resource management
-JavaScript arrays can contain mixed value types and resize dynamically. Here, all values are integers, so std::vector<int> is the appropriate C++ representation.
+| JavaScript construct              | C++ equivalent                                      |
+|-----------------------------------|-----------------------------------------------------|
+| Dynamically typed values          | Statically declared types such as `int`             |
+| JavaScript Array                  | `std::vector<int>`                                  |
+| `arr.length`                      | `arr.size()`                                        |
+| `let` / `const`                   | Explicit types, optionally with C++ `const`         |
+| `console.log(...)`                | `std::cout << ... << '\n'`                          |
+| Automatic function parameter typing | Explicit parameter and return types               |
+| Garbage-collected memory          | RAII-based automatic resource management            |
+
+JavaScript arrays can contain mixed value types and resize dynamically. Here, all values are integers, so `std::vector<int>` is the appropriate C++ representation.
 
 2. Translation strategy
-Represent numbers using std::vector<int>.
-Pass the vector as const std::vector<int>&:
-const prevents the function from modifying it.
-& avoids copying the complete vector.
-Preserve the original maximum-search algorithm:
-initialize the maximum with the first element;
-start iteration at index 1;
-replace the maximum whenever a larger element is found.
-Use std::size_t for the index because it matches the unsigned type returned by vector::size().
-Use std::cout for output.
-The algorithm remains:
 
-𝑂
-(
-𝑛
-)
- time
-,
-𝑂
-(
-1
-)
- auxiliary space
-O(n) time,O(1) auxiliary space
+- Represent numbers using `std::vector<int>`.
+- Pass the vector as `const std::vector<int>&`:
+  - `const` prevents the function from modifying it
+  - `&` avoids copying the complete vector
+- Preserve the original maximum-search algorithm:
+  - initialize the maximum with the first element
+  - start iteration at index 1
+  - replace the maximum whenever a larger element is found
+- Use `std::size_t` for the index because it matches the unsigned type returned by `vector::size()`.
+- Use `std::cout` for output.
+
+The algorithm remains: **O(n)** time, **O(1)** auxiliary space.
 
 3. C++ translated code
-cpp
+
+```cpp
 #include <cstddef>
 #include <iostream>
 #include <vector>
@@ -122,15 +114,19 @@ int main()
 
     return 0;
 }
+```
 
 Output:
-text
+
+```text
 9
+```
 
 4. Short explanation of key adaptations
-std::vector<int> provides a dynamically sized, type-safe sequence without manual memory allocation.
-const std::vector<int>& passes the vector efficiently without copying or allowing modification.
-std::size_t is used for indexing to match values.size().
-++i is idiomatic in C++, although for primitive integers it has effectively the same performance as i++.
-The vector manages its own memory through RAII, so no new, delete, or raw pointers are needed.
-Like the JavaScript source, this implementation assumes that the input is non-empty. Accessing values[0] for an empty vector would be invalid. Adding empty-input handling would change the source function’s contract, so it is intentionally not included.
+
+- `std::vector<int>` provides a dynamically sized, type-safe sequence without manual memory allocation.
+- `const std::vector<int>&` passes the vector efficiently without copying or allowing modification.
+- `std::size_t` is used for indexing to match `values.size()`.
+- `++i` is idiomatic in C++, although for primitive integers it has effectively the same performance as `i++`.
+- The vector manages its own memory through RAII, so no `new`, `delete`, or raw pointers are needed.
+- Like the JavaScript source, this implementation assumes that the input is non-empty. Accessing `values[0]` for an empty vector would be invalid. Adding empty-input handling would change the source function’s contract, so it is intentionally not included.

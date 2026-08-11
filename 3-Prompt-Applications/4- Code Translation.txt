@@ -1,0 +1,136 @@
+[ROLE]
+You are a senior software engineer expert in both JavaScript and C++. You specialize in algorithm translation, memory management, and performance optimization in low-level languages.
+
+[TASK]
+Translate the given JavaScript code into equivalent C++ code while preserving the exact logic and output behavior.
+
+[SOURCE CODE]
+```javascript
+function findMax(arr) {
+    let max = arr[0];
+
+    for (let i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+
+    return max;
+}
+
+const numbers = [3, 7, 2, 9, 5];
+console.log(findMax(numbers));
+```
+
+[TARGET LANGUAGE RULES (C++)]
+
+* Use standard C++ (C++11 or newer)
+* Use vectors instead of arrays where appropriate
+* Maintain the same algorithm logic
+* Use proper type declarations (int, vector, etc.)
+* Ensure safe memory usage (no raw memory leaks)
+* Use iostream for output
+
+[CONSTRAINTS]
+
+* Do NOT change algorithm complexity
+* Do NOT introduce new data structures unless necessary
+* Do NOT alter output behavior
+* Keep code simple and readable
+
+[ANALYSIS REQUIRED]
+
+* Identify JavaScript-specific constructs and their C++ equivalents
+* Explain any necessary adaptations (e.g., dynamic arrays, typing)
+* Highlight differences in memory and execution model
+
+[OUTPUT FORMAT]
+
+1. Language differences summary (JS vs C++)
+2. Translation strategy
+3. C++ translated code
+4. Short explanation of key adaptations
+
+
+
+result =>
+
+1. Language differences summary
+
+JavaScript construct	C++ equivalent
+Dynamically typed values	Statically declared types such as int
+JavaScript Array	std::vector<int>
+arr.length	arr.size()
+let / const	Explicit types, optionally with C++ const
+console.log(...)	std::cout << ... << '\n'
+Automatic function parameter typing	Explicit parameter and return types
+Garbage-collected memory	RAII-based automatic resource management
+JavaScript arrays can contain mixed value types and resize dynamically. Here, all values are integers, so std::vector<int> is the appropriate C++ representation.
+
+2. Translation strategy
+Represent numbers using std::vector<int>.
+Pass the vector as const std::vector<int>&:
+const prevents the function from modifying it.
+& avoids copying the complete vector.
+Preserve the original maximum-search algorithm:
+initialize the maximum with the first element;
+start iteration at index 1;
+replace the maximum whenever a larger element is found.
+Use std::size_t for the index because it matches the unsigned type returned by vector::size().
+Use std::cout for output.
+The algorithm remains:
+
+𝑂
+(
+𝑛
+)
+ time
+,
+𝑂
+(
+1
+)
+ auxiliary space
+O(n) time,O(1) auxiliary space
+
+3. C++ translated code
+cpp
+#include <cstddef>
+#include <iostream>
+#include <vector>
+
+int findMax(const std::vector<int>& values)
+{
+    int max = values[0];
+
+    for (std::size_t i = 1; i < values.size(); ++i)
+    {
+        if (values[i] > max)
+        {
+            max = values[i];
+        }
+    }
+
+    return max;
+}
+
+int main()
+{
+    const std::vector<int> numbers{3, 7, 2, 9, 5};
+
+    std::cout << findMax(numbers) << '\n';
+
+    return 0;
+}
+
+Output:
+text
+9
+
+4. Short explanation of key adaptations
+std::vector<int> provides a dynamically sized, type-safe sequence without manual memory allocation.
+const std::vector<int>& passes the vector efficiently without copying or allowing modification.
+std::size_t is used for indexing to match values.size().
+++i is idiomatic in C++, although for primitive integers it has effectively the same performance as i++.
+The vector manages its own memory through RAII, so no new, delete, or raw pointers are needed.
+Like the JavaScript source, this implementation assumes that the input is non-empty. Accessing values[0] for an empty vector would be invalid. Adding empty-input handling would change the source function’s contract, so it is intentionally not included.

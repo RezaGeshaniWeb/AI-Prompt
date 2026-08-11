@@ -1,0 +1,200 @@
+[ROLE]
+You are a senior JavaScript test engineer specializing in unit testing, test coverage, and test-driven development (TDD) using Jest.
+
+[TASK]
+Generate comprehensive test cases for the given JavaScript code, including edge cases, error handling, and normal scenarios.
+
+[CODE UNDER TEST]
+```javascript
+function calculateTotal(cartItems) {
+    if (!Array.isArray(cartItems)) {
+        throw new Error("Invalid input");
+    }
+
+    let total = 0;
+
+    for (let item of cartItems) {
+        if (!item.price || item.price < 0) {
+            continue;
+        }
+        total += item.price * (item.quantity || 1);
+    }
+
+    return total;
+}
+```
+
+[TESTING FRAMEWORK]
+Use Jest (JavaScript testing framework)
+
+[REQUIREMENTS]
+
+* Write unit tests for normal cases
+* Include edge cases (empty array, invalid input, missing fields)
+* Test error handling explicitly
+* Ensure high test coverage
+* Use clear test descriptions (it/should format)
+
+[EDGE CASES TO CONSIDER]
+
+* Empty cart
+* Null or undefined input
+* Items with missing price
+* Negative price values
+* Items without quantity field
+* Large number of items
+
+[OUTPUT FORMAT]
+Return only test code in this format:
+describe("calculateTotal", () => {
+    // tests here
+});
+Explain how to run tests by details
+
+[CONSTRAINTS]
+
+* Do NOT modify the original function
+* Do NOT include explanations
+* Do NOT use external libraries other than Jest
+* Keep tests clean and readable
+
+
+
+result =>
+
+```javascript
+describe("calculateTotal", () => {
+    // Normal cases
+    it("should calculate total for items with price and quantity", () => {
+        const cartItems = [
+            { price: 10, quantity: 2 },
+            { price: 5, quantity: 3 }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(35);
+    });
+
+    it("should default quantity to 1 when quantity is missing", () => {
+        const cartItems = [
+            { price: 20 },
+            { price: 15, quantity: 2 }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(50);
+    });
+
+    it("should handle a single item correctly", () => {
+        const cartItems = [{ price: 12.5, quantity: 4 }];
+
+        expect(calculateTotal(cartItems)).toBe(50);
+    });
+
+    // Edge cases
+    it("should return 0 for an empty cart", () => {
+        expect(calculateTotal([])).toBe(0);
+    });
+
+    it("should skip items with missing price", () => {
+        const cartItems = [
+            { quantity: 2 },
+            { price: 10, quantity: 1 }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(10);
+    });
+
+    it("should skip items with price equal to 0", () => {
+        const cartItems = [
+            { price: 0, quantity: 5 },
+            { price: 8, quantity: 1 }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(8);
+    });
+
+    it("should skip items with negative price", () => {
+        const cartItems = [
+            { price: -10, quantity: 2 },
+            { price: 7, quantity: 3 }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(21);
+    });
+
+    it("should treat falsy quantity as 1", () => {
+        const cartItems = [
+            { price: 10, quantity: 0 },
+            { price: 5, quantity: null }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(15);
+    });
+
+    it("should calculate total for a large number of items", () => {
+        const cartItems = Array.from({ length: 1000 }, (_, index) => ({
+            price: 2,
+            quantity: 1
+        }));
+
+        expect(calculateTotal(cartItems)).toBe(2000);
+    });
+
+    it("should ignore invalid items and still sum valid ones", () => {
+        const cartItems = [
+            { price: 10, quantity: 1 },
+            { price: -5, quantity: 2 },
+            { quantity: 3 },
+            { price: 4, quantity: 2 }
+        ];
+
+        expect(calculateTotal(cartItems)).toBe(18);
+    });
+
+    // Error handling
+    it("should throw an error when input is null", () => {
+        expect(() => calculateTotal(null)).toThrow("Invalid input");
+    });
+
+    it("should throw an error when input is undefined", () => {
+        expect(() => calculateTotal(undefined)).toThrow("Invalid input");
+    });
+
+    it("should throw an error when input is not an array", () => {
+        expect(() => calculateTotal({})).toThrow("Invalid input");
+        expect(() => calculateTotal("cart")).toThrow("Invalid input");
+        expect(() => calculateTotal(42)).toThrow("Invalid input");
+    });
+});
+```
+
+**How to run the tests**
+
+1. Install Jest (if not already installed):
+
+```bash
+npm install --save-dev jest
+```
+
+2. Save the function under test (for example in `calculateTotal.js`) and the tests in a matching file (for example `calculateTotal.test.js`). Export/import the function as needed.
+
+3. Add a test script in `package.json`:
+
+```json
+{
+  "scripts": {
+    "test": "jest"
+  }
+}
+```
+
+4. Run the tests:
+
+```bash
+npm test
+```
+
+5. Optional — run with coverage:
+
+```bash
+npx jest --coverage
+```
